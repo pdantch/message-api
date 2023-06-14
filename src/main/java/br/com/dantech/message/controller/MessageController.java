@@ -67,21 +67,20 @@ public class MessageController {
 
 	@PostMapping
 	public ResponseEntity<EntityModel<MessageRecord>> createMessage(@RequestBody Message message) throws Exception {
-		EntityModel<MessageRecord> entity;
 		MessageRecord record;
 
 		try {
 			message.setCreated(new Date().toInstant().atOffset(ZoneOffset.UTC).toLocalDate());
 			record = new MessageRecord(this.messageService.createMessage(message), HttpStatus.CREATED);
-			entity = EntityModel.of(record);
-			Link selfLink = linkTo(methodOn(MessageController.class).getMessageById(record.message().getId()))
-					.withSelfRel();
-			entity.add(selfLink);
 		} catch (Exception e) {
 			message.setCreated(null);
 			record = new MessageRecord(message, HttpStatus.ALREADY_REPORTED);
-			entity = EntityModel.of(record);
 		}
+
+		EntityModel<MessageRecord> entity;
+		entity = EntityModel.of(record);
+		Link selfLink = linkTo(methodOn(MessageController.class).getMessageById(record.message().getId())).withSelfRel();
+		entity.add(selfLink);
 
 		return new ResponseEntity<>(entity, record.status());
 	}
