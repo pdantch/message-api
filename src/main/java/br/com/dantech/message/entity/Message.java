@@ -1,6 +1,6 @@
 package br.com.dantech.message.entity;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -19,5 +19,5 @@ public class Message {
 	private String name;
 	private String email;
 	private String text;
-	private LocalDate created;
+	private LocalDateTime created;
 }

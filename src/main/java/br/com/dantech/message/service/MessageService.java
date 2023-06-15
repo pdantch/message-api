@@ -1,36 +1,49 @@
 package br.com.dantech.message.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import br.com.dantech.message.entity.Message;
+import br.com.dantech.message.exception.MessageException;
 import br.com.dantech.message.repository.MessageRepository;
 
 @Service
-public class MessageService {
+public class MessageService implements IMessageService {
 
-	private final MessageRepository messageRepository;
+	private final MessageRepository repository;
 
-	public MessageService(MessageRepository messageRepository) {
-		this.messageRepository = messageRepository;
+	public MessageService(MessageRepository repository) {
+		this.repository = repository;
 	}
 
+	@Override
 	public List<Message> getAllMessages() {
-		return messageRepository.findAll();
+		return repository.findAll();
 	}
 
+	@Override
 	public Optional<Message> getMessageById(String string) {
-		return messageRepository.findById(string);
+		return repository.findById(string);
 	}
 
-	public Message createMessage(Message message) throws Exception {
-		return messageRepository.insert(message);
+	@Override
+	public Optional<Message> createMessage(Message message) throws MessageException {
+		try {
+			message.setCreated(LocalDateTime.now());
+			return Optional.of(repository.insert(message));
+		} catch (DuplicateKeyException e) {
+			message.setCreated(null);
+			throw new MessageException(e.getCause().getMessage());
+		}
 	}
 
+	@Override
 	public void deleteMessage(String id) {
-		messageRepository.deleteById(id);
+		repository.deleteById(id);
 	}
 
 }
