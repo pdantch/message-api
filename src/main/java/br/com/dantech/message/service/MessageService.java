@@ -7,8 +7,8 @@ import java.util.Optional;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
-import br.com.dantech.message.entity.Message;
 import br.com.dantech.message.exception.MessageException;
+import br.com.dantech.message.model.Message;
 import br.com.dantech.message.repository.MessageRepository;
 
 @Service

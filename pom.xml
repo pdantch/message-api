@@ -12,8 +12,14 @@
 	<groupId>br.com.dantech</groupId>
 	<artifactId>message</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>MessageApi</name>
-	<description>Demo project for Spring Boot</description>
+	<name>message-api</name>
+	<description>
+		API RESTful para gerenciamento de mensagens usando o framework
+		Spring. Implementa operações CRUD para criar, ler e excluir mensagens.
+		Utiliza o banco de dados NoSQL MongoDB. Utiliza o Spring HATEOAS para
+		respostas no formato HATEOAS. Documentação detalhada disponível no
+		README.
+	</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>

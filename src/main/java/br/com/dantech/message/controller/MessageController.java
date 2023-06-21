@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.dantech.message.entity.Message;
-import br.com.dantech.message.entity.Response;
+import br.com.dantech.message.model.Message;
+import br.com.dantech.message.model.ResponseRecord;
 import br.com.dantech.message.service.IMessageService;
 import br.com.dantech.message.service.MessageService;
 
@@ -35,21 +35,39 @@ public class MessageController {
 	}
 
 	@GetMapping
-	public ResponseEntity<CollectionModel<EntityModel<Message>>> getAllMessages() {
+	public ResponseEntity<CollectionModel<EntityModel<ResponseRecord>>> getAllMessages() {
 		List<Message> messages = this.service.getAllMessages();
-		List<EntityModel<Message>> entityModels = new ArrayList<>();
+		List<EntityModel<ResponseRecord>> entityModels = new ArrayList<>();
 
 		messages.forEach(m -> {
-			EntityModel<Message> entityModel = EntityModel.of(m);
+
+			EntityModel<ResponseRecord> entityModel = EntityModel.of(new ResponseRecord(m, HttpStatus.OK));
 			entityModel.add(linkTo(methodOn(MessageController.class).getMessageById(m.getId())).withSelfRel());
 			entityModels.add(entityModel);
 		});
 
-		CollectionModel<EntityModel<Message>> collectionModel = CollectionModel.of(entityModels);
+		CollectionModel<EntityModel<ResponseRecord>> collectionModel = CollectionModel.of(entityModels);
 		collectionModel.add(linkTo(methodOn(MessageController.class).getAllMessages()).withSelfRel());
 
-		return new ResponseEntity<>(collectionModel, HttpStatus.OK);
+		return new ResponseEntity<CollectionModel<EntityModel<ResponseRecord>>>(collectionModel, HttpStatus.OK);
 	}
+
+	@PostMapping	
+	public ResponseEntity<EntityModel<ResponseRecord>> createMessage(@RequestBody Message message) {
+		EntityModel<ResponseRecord> entity;
+		ResponseRecord response;
+
+		try {
+			response = new ResponseRecord(this.service.createMessage(message).get(), HttpStatus.CREATED);
+			entity = EntityModel.of(response);
+			entity.add(linkTo(methodOn(MessageController.class).getMessageById(message.getId())).withSelfRel());
+		} catch (Exception e) {
+			response = new ResponseRecord(message, HttpStatus.ALREADY_REPORTED);
+			entity = EntityModel.of(response);
+		}
+		return new ResponseEntity<>(entity, response.status());
+
+	}	
 
 	@GetMapping("/{id}")
 	public ResponseEntity<EntityModel<Message>> getMessageById(@PathVariable("id") String id) {
@@ -60,23 +78,6 @@ public class MessageController {
 			entityModel.add(linkTo(methodOn(MessageController.class).getMessageById(id)).withSelfRel());
 			return new ResponseEntity<>(entityModel, HttpStatus.OK);
 		}).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-	}
-
-	@PostMapping
-	public ResponseEntity<EntityModel<Response>> createMessage(@RequestBody Message message) {
-		EntityModel<Response> entity;
-		Response response;
-
-		try {
-			response = new Response(this.service.createMessage(message).get(), HttpStatus.CREATED);
-			entity = EntityModel.of(response);
-			entity.add(linkTo(methodOn(MessageController.class).getMessageById(message.getId())).withSelfRel());
-		} catch (Exception e) {
-			response = new Response(message, HttpStatus.ALREADY_REPORTED);
-			entity = EntityModel.of(response);
-		}
-		return new ResponseEntity<>(entity, response.status());
-
 	}
 
 	@DeleteMapping("/{id}")
